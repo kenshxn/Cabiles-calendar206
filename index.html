@@ -70,7 +70,7 @@
     background-color: #d9534f;
     color: white;
   }
-  /* Modal styles */
+  
   #modal {
     position: fixed;
     display: none;
@@ -114,7 +114,7 @@
   #modal .close-btn:hover {
     background: #888;
   }
-  /* Responsive */
+  
   @media (max-width: 960px) {
     .calendar {
       justify-content: flex-start;
@@ -132,7 +132,7 @@
 <h1>2024 Philippines Calendar</h1>
 <div class="calendar" id="calendar"></div>
 
-<!-- Modal for holiday info -->
+
 <div id="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
   <div class="content">
     <button class="close-btn" aria-label="Close">&times;</button>
@@ -143,8 +143,7 @@
 </div>
 
 <script>
-  // List of Philippine Common Regular Holidays 2024 with info
-  // Source - Official Phil. holidays (some visual images are placeholders)
+
   const holidays2024 = {
     "2024-01-01": {
       name: "New Year's Day",
@@ -203,7 +202,7 @@
     }
   };
 
-  // Months and days mapping
+
   const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
@@ -211,11 +210,10 @@
 
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Function to calculate ISO week number
-  // Week 1 is the week with the year's first Thursday in it
+ 
   function getWeekNumber(date) {
     const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    // Thursday in current week decides the year.
+ 
     tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay()||7));
     const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(),0,1));
     const weekNo = Math.ceil(((tempDate - yearStart) / 86400000 + 1)/7);
@@ -226,7 +224,7 @@
     return num < 10 ? "0"+num : num;
   }
 
-  // Create the calendar for the whole year
+
   function createCalendar(year) {
     const container = document.getElementById("calendar");
     container.innerHTML = "";
@@ -236,27 +234,27 @@
       const lastDay = new Date(year, month + 1, 0);
       const daysInMonth = lastDay.getDate();
 
-      // Create table for the month
+   
       const table = document.createElement("table");
       table.setAttribute("aria-label", `${months[month]} ${year} calendar`);
 
-      // Caption: month year
+    
       const caption = document.createElement("caption");
       caption.textContent = `${months[month]} ${year}`;
       table.appendChild(caption);
 
-      // Header: week, day names
+    
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
 
-      // Week number header cell
+      
       const thWeekNum = document.createElement("th");
       thWeekNum.className = "weeknum";
       thWeekNum.scope = "col";
       thWeekNum.textContent = "Wk";
       headerRow.appendChild(thWeekNum);
 
-      // Days names
+  
       for (let d = 0; d < 7; d++) {
         const th = document.createElement("th");
         th.className = "day";
@@ -269,8 +267,7 @@
 
       const tbody = document.createElement("tbody");
 
-      // We start weeks on Sunday
-      // Calculate the day of week of the first day (0=Sun..6=Sat)
+ 
       let startDay = firstDay.getDay();
 
       let currentDate = 1;
@@ -279,13 +276,12 @@
       while (!done) {
         const tr = document.createElement("tr");
 
-        // Calculate week number: ISO weeks start Monday, so use Monday of this week
-        // Compute date of Monday in this week:
+        
         const dayOfWeek = new Date(year, month, currentDate).getDay();
         const mondayDate = new Date(year, month, currentDate - ((dayOfWeek + 6) % 7));
         const wkNum = getWeekNumber(mondayDate);
 
-        // Week number cell
+        
         const tdWeekNum = document.createElement("td");
         tdWeekNum.className = "weeknum";
         tdWeekNum.textContent = wkNum;
@@ -294,7 +290,7 @@
         for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
           const td = document.createElement("td");
 
-          // Calculate the global day number we are in this row
+          
           const cellDayNum = currentDate - startDay + dayIdx;
 
           if (cellDayNum >= 1 && cellDayNum <= daysInMonth) {
@@ -303,7 +299,7 @@
 
             if (holidays2024[dayStr]) {
               td.classList.add("holiday");
-              td.tabIndex = 0; // Make focusable for keyboard users
+              td.tabIndex = 0; 
               td.setAttribute("role","button");
               td.setAttribute("aria-label", `Holiday: ${holidays2024[dayStr].name}`);
               td.dataset.date = dayStr;
@@ -329,7 +325,7 @@
     }
   }
 
-  // Modal functionality
+  
   const modal = document.getElementById('modal');
   const modalTitle = document.getElementById('modal-title');
   const modalDesc = document.getElementById('modal-desc');
@@ -353,7 +349,7 @@
     modal.setAttribute('aria-hidden', 'true');
   }
 
-  // Close modal clicking close button or outside modal content or pressing ESC
+  
   closeBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
@@ -365,7 +361,7 @@
     }
   });
 
-  // Event delegate clicks on holidays to open modal
+
   document.getElementById('calendar').addEventListener('click', (e) => {
     const target = e.target;
     if (target.classList.contains('holiday') && target.dataset.date) {
@@ -373,7 +369,7 @@
     }
   });
 
-  // Also support keyboard enter/space on holiday cells for accessibility
+
   document.getElementById('calendar').addEventListener('keydown', (e) => {
     if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('holiday')) {
       e.preventDefault();
@@ -381,9 +377,10 @@
     }
   });
 
-  // Create calendar for 2024 on page load
+
   createCalendar(2024);
 </script>
 
 </body>
+
 </html>
