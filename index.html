@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>2024 Calendar - Philippines</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #ee6bffb7;
+    background-image:url("blossom.jpg") ;
+    margin: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .calendar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+  }
+  table {
+    border-collapse: collapse;
+    background: white;
+    box-shadow: 0 0 8px rgb(0 0 0 / 0.1);
+    width: 280px;
+    font-size: 14px;
+  }
+  caption {
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+    font-size: 18px;
+    background-color: #a406ee;
+    color: white;
+    user-select: none;
+  }
+  thead {
+    background-color: #d9e2f3;
+  }
+  th, td {
+    border: 1px solid #bbb;
+    padding: 6px 6px;
+    text-align: center;
+  }
+  th.weeknum, td.weeknum {
+    background: #e7eefc;
+    font-weight: bold;
+    width: 30px;
+    user-select: none;
+  }
+  th.day, td.day {
+    width: 30px;
+    cursor: default;
+    user-select: none;
+  }
+  td.empty {
+    background: #fafafa;
+  }
+  td.holiday {
+    background-color: #f4cccc;
+    color: #a80000;
+    font-weight: bold;
+    cursor: pointer;
+    position: relative;
+  }
+  td.holiday:hover {
+    background-color: #d9534f;
+    color: white;
+  }
+  /* Modal styles */
+  #modal {
+    position: fixed;
+    display: none;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  #modal.active {
+    display: flex;
+  }
+  #modal .content {
+    background: white;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 6px;
+    text-align: center;
+    position: relative;
+  }
+  #modal .content img {
+    max-width: 100%;
+    margin: 15px 0;
+    border-radius: 4px;
+  }
+  #modal .close-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: #bbb;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    color: white;
+    line-height: 24px;
+  }
+  #modal .close-btn:hover {
+    background: #888;
+  }
+  /* Responsive */
+  @media (max-width: 960px) {
+    .calendar {
+      justify-content: flex-start;
+      gap: 20px;
+    }
+    table {
+      width: 100%;
+      max-width: 320px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>2024 Philippines Calendar</h1>
+<div class="calendar" id="calendar"></div>
+
+<!-- Modal for holiday info -->
+<div id="modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="content">
+    <button class="close-btn" aria-label="Close">&times;</button>
+    <h2 id="modal-title"></h2>
+    <img id="modal-image" alt="" />
+    <p id="modal-desc"></p>
+  </div>
+</div>
+
+<script>
+  // List of Philippine Common Regular Holidays 2024 with info
+  // Source - Official Phil. holidays (some visual images are placeholders)
+  const holidays2024 = {
+    "2024-01-01": {
+      name: "New Year's Day",
+      description: "Celebrating new yeear in the Philippines.",
+      image:"https://images.rove.me/w_1920,q_85/ffjm07rjnowb4srk3dz5/philippines-new-years-eve.jpg"
+    },
+    "2024-02-10": {
+      name: "Chinese new year",
+      description: "Celebrating chinese new yeear in the Philippines.",
+      image:"https://images.rove.me/w_1920,q_85/iy43pdrmi1ch0umdbalu/philippines-chinese-new-year.jpg"
+    },
+    "2024-04-09": {
+      name: "Araw ng Kagitingan / Day of Valor",
+      description: "Commemorates the heroism of Filipino soldiers during World War II.",
+      image: "https://od2-image-api.abs-cbn.com/prod/20241025131048/b51192a9e0c27f481dfb806f25b185cabc53f52e837b1a2c6509c7ebf9846284.jpg?w=966&h=644"
+    },
+    "2024-05-01": {
+      name: "Labor Day",
+      description: "Celebrates the achievements and contributions of workers.",
+      image: "https://www.lumina.com.ph/assets/news-and-blogs-photos/Labor-Day-as-a-National-Holiday-and-How-to-Celebrate-it/2-Labor-Day-as-a-National-Holiday-and-How-to-Celebrate-it-v2.webp"
+    },
+    "2024-06-12": {
+      name: "Independence Day",
+      description: "Commemorates Philippine Independence from Spain in 1898.",
+      image: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEglAjnrllPnedKBVK_q_5rTqBfR3qBpn1zDP0aBtaLEeWHaP0RNK-x1rHgxMAaer05LOVWOQp3GvHDIQ9ejysQM7ylmPcnMIvBXI-bWKCQXNwLn7unYZnI4_R7acsF8FzE-2TNmY_rsxUCR/s1600/2020-06_ph-independence_01.jpg"
+    },
+    "2024-08-21": {
+      name: "Ninoy Aquino day",
+      description: "Ninoy Aquino Day is a national non-working holiday in the Philippines, observed every August 21st to commemorate the assassination of former Senator Benigno Ninoy Aquino Jr.",
+      image: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Senator_Bam_Aquino_at_the_Ninoy_Aquino_International_Airport_Terminal_1_to_commemorate_the_42nd_anniversary_of_the_assassination_of_Ninoy_Aquino_%2803%29.jpg/1200px-Senator_Bam_Aquino_at_the_Ninoy_Aquino_International_Airport_Terminal_1_to_commemorate_the_42nd_anniversary_of_the_assassination_of_Ninoy_Aquino_%2803%29.jpg"
+    },
+    "2024-08-26": {
+      name: "National Heroes Day",
+      description: "Honors all of the country's heroes who fought for freedom.",
+      image: "https://images.gmanews.tv/webpics/2024/08/640_natlheroesday_2024_08_26_11_46_49.jpg"
+    },
+    "2024-11-01": {
+      name: "All Saints' Day",
+      description: "A day to honor all saints and departed loved ones. Filipinos visit cemeteries to clean tombs, offer flowers and prayers, and spend time with family remembering ancestors..",
+      image: "https://www.lumina.com.ph/assets/news-and-blogs-photos/How-to-Celebrate-All-Souls-Day-at-Home/Celebrated-on-November-2-Filipinos-offer-flowers-and-praying-for-the-dead.webp"
+    },
+    "2024-11-30": {
+      name: "Bonifacio Day",
+      description: "Commemorates the birth of revolutionary leader Andres Bonifacio.",
+      image: "https://media.interaksyon.com/wp-content/uploads/2021/11/Bonifacio-Shrine-edited.jpg"
+    },
+    "2024-12-25": {
+      name: "Christmas Day",
+      description: "Celebration of the birth of Jesus Christ.",
+      image: "https://blog.halophilippines.co.uk/wp-content/uploads/2023/11/shutterstock_773356420-1-1920x1272.jpg"
+    },
+    "2024-12-30": {
+      name: "Rizal Day",
+      description: "Remembers the execution of Philippine national hero José Rizal.",
+      image: "https://www.rappler.com/tachyon/2023/12/rizal-day-flag-raising-marcos-december-30-2023-006-1-scaled.jpg"
+    }
+  };
+
+  // Months and days mapping
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Function to calculate ISO week number
+  // Week 1 is the week with the year's first Thursday in it
+  function getWeekNumber(date) {
+    const tempDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Thursday in current week decides the year.
+    tempDate.setUTCDate(tempDate.getUTCDate() + 4 - (tempDate.getUTCDay()||7));
+    const yearStart = new Date(Date.UTC(tempDate.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil(((tempDate - yearStart) / 86400000 + 1)/7);
+    return weekNo;
+  }
+
+  function pad(num) {
+    return num < 10 ? "0"+num : num;
+  }
+
+  // Create the calendar for the whole year
+  function createCalendar(year) {
+    const container = document.getElementById("calendar");
+    container.innerHTML = "";
+
+    for (let month = 0; month < 12; month++) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
+
+      // Create table for the month
+      const table = document.createElement("table");
+      table.setAttribute("aria-label", `${months[month]} ${year} calendar`);
+
+      // Caption: month year
+      const caption = document.createElement("caption");
+      caption.textContent = `${months[month]} ${year}`;
+      table.appendChild(caption);
+
+      // Header: week, day names
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      // Week number header cell
+      const thWeekNum = document.createElement("th");
+      thWeekNum.className = "weeknum";
+      thWeekNum.scope = "col";
+      thWeekNum.textContent = "Wk";
+      headerRow.appendChild(thWeekNum);
+
+      // Days names
+      for (let d = 0; d < 7; d++) {
+        const th = document.createElement("th");
+        th.className = "day";
+        th.scope = "col";
+        th.textContent = days[d];
+        headerRow.appendChild(th);
+      }
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      // We start weeks on Sunday
+      // Calculate the day of week of the first day (0=Sun..6=Sat)
+      let startDay = firstDay.getDay();
+
+      let currentDate = 1;
+      let done = false;
+
+      while (!done) {
+        const tr = document.createElement("tr");
+
+        // Calculate week number: ISO weeks start Monday, so use Monday of this week
+        // Compute date of Monday in this week:
+        const dayOfWeek = new Date(year, month, currentDate).getDay();
+        const mondayDate = new Date(year, month, currentDate - ((dayOfWeek + 6) % 7));
+        const wkNum = getWeekNumber(mondayDate);
+
+        // Week number cell
+        const tdWeekNum = document.createElement("td");
+        tdWeekNum.className = "weeknum";
+        tdWeekNum.textContent = wkNum;
+        tr.appendChild(tdWeekNum);
+
+        for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+          const td = document.createElement("td");
+
+          // Calculate the global day number we are in this row
+          const cellDayNum = currentDate - startDay + dayIdx;
+
+          if (cellDayNum >= 1 && cellDayNum <= daysInMonth) {
+            const dayStr = pad(year) + "-" + pad(month + 1) + "-" + pad(cellDayNum);
+            td.className = "day";
+
+            if (holidays2024[dayStr]) {
+              td.classList.add("holiday");
+              td.tabIndex = 0; // Make focusable for keyboard users
+              td.setAttribute("role","button");
+              td.setAttribute("aria-label", `Holiday: ${holidays2024[dayStr].name}`);
+              td.dataset.date = dayStr;
+              td.textContent = cellDayNum;
+            } else {
+              td.textContent = cellDayNum;
+            }
+          } else {
+            td.className = "empty";
+            td.textContent = "";
+          }
+          tr.appendChild(td);
+        }
+
+        tbody.appendChild(tr);
+
+        currentDate += 7;
+        if (currentDate - startDay > daysInMonth) done = true;
+      }
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+  }
+
+  // Modal functionality
+  const modal = document.getElementById('modal');
+  const modalTitle = document.getElementById('modal-title');
+  const modalDesc = document.getElementById('modal-desc');
+  const modalImage = document.getElementById('modal-image');
+  const closeBtn = modal.querySelector('.close-btn');
+
+  function openModal(dateStr) {
+    const data = holidays2024[dateStr];
+    if (!data) return;
+    modalTitle.textContent = data.name;
+    modalDesc.textContent = data.description;
+    modalImage.src = data.image;
+    modalImage.alt = data.name;
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  // Close modal clicking close button or outside modal content or pressing ESC
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === "Escape" && modal.classList.contains('active')) {
+      closeModal();
+    }
+  });
+
+  // Event delegate clicks on holidays to open modal
+  document.getElementById('calendar').addEventListener('click', (e) => {
+    const target = e.target;
+    if (target.classList.contains('holiday') && target.dataset.date) {
+      openModal(target.dataset.date);
+    }
+  });
+
+  // Also support keyboard enter/space on holiday cells for accessibility
+  document.getElementById('calendar').addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('holiday')) {
+      e.preventDefault();
+      openModal(e.target.dataset.date);
+    }
+  });
+
+  // Create calendar for 2024 on page load
+  createCalendar(2024);
+</script>
+
+</body>
+</html>
